@@ -19,6 +19,9 @@ export default defineConfig({
     setupFiles: "./src/test/setup.js",
     css: false,
     // Tests talk to a real Django server when E2E=1 (see src/test/e2e.test.jsx).
-    env: { VITE_API_BASE: process.env.TEST_API_BASE || "http://127.0.0.1:8000/api/v1" },
+    env: {
+      VITE_API_BASE_URL: process.env.TEST_API_BASE_URL || "",
+      VITE_API_BASE: process.env.TEST_API_BASE || "http://127.0.0.1:8000/api/v1",
+    },
   },
 });

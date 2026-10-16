@@ -35,7 +35,11 @@ describe("api client", () => {
     fetch.mockResolvedValue(json({ success: true, message: "ok", data: [1, 2], meta: { count: 2 } }));
     const r = await api.get("/products/", { query: { page: 2, search: "", on_sale: false, category: "koti" } });
     expect(r).toEqual({ data: [1, 2], meta: { count: 2 }, message: "ok" });
-    expect(fetch.mock.calls[0][0]).toMatch(/\/products\/\?page=2&category=koti$/); // empty/false params dropped
+    const requestedUrl = new URL(fetch.mock.calls[0][0]);
+    const configuredBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE;
+    expect(requestedUrl.origin).toBe(new URL(configuredBase).origin);
+    expect(requestedUrl.pathname).toBe("/api/v1/products/"); // versioned API prefix appears once
+    expect(requestedUrl.search).toBe("?page=2&category=koti"); // empty/false params dropped
   });
 
   it("turns error envelopes into ApiError with field errors", async () => {

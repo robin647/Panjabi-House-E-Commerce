@@ -4,7 +4,12 @@
 // {success:false, message, errors, code}. This module unwraps both, silently
 // refreshes an expired access token once, and exposes one ApiError shape.
 
-const BASE = (import.meta.env.VITE_API_BASE || "/api/v1").replace(/\/$/, "");
+// Vite's static build is hosted separately from Django in production. Accept
+// an API origin, then append the versioned prefix exactly once. Keep supporting
+// VITE_API_BASE for local setups that already supply a full API base path.
+const configuredApiBase = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || "").trim();
+const apiOrigin = configuredApiBase.replace(/\/+$/, "").replace(/\/api\/v1$/i, "");
+const BASE = `${apiOrigin}/api/v1`;
 const TOKEN_KEY = "shop.tokens";
 
 export class ApiError extends Error {

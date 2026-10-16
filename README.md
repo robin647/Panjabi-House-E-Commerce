@@ -333,45 +333,17 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ## Production deployment
 
-Works on Render, Railway, AWS, DigitalOcean, or a bare VPS — the image is
-portable. In all cases:
-
-1. Set `DJANGO_SETTINGS_MODULE=config.settings.prod`.
-2. Provide every variable in `.env.example` via the platform's secret/env
-   manager (never baked into the image). `config/settings/prod.py` **refuses
-   to boot** if `SECRET_KEY`, `ALLOWED_HOSTS`, or `CORS_ALLOWED_ORIGINS` are
-   missing or look unsafe (e.g. `DEBUG=True`, `ALLOWED_HOSTS=*`).
-3. Release step: `python manage.py migrate && python manage.py collectstatic --noinput`.
-4. Run: `gunicorn -c gunicorn.conf.py config.wsgi:application`.
-5. Point your platform's health check at `GET /api/v1/health/`.
-6. Put a managed PostgreSQL and managed Redis in front of `DATABASE_URL` /
-   `REDIS_URL`.
-7. **Product images**: uploaded via Django Admin go to local disk
-   (`MEDIA_ROOT`) by default. On most platforms (Render, Railway, Heroku-style
-   PaaS) local disk is **not persistent across deploys** — switch `STORAGES["default"]`
-   to `django-storages` (already a dependency) pointed at S3/Cloudinary
-   before you rely on uploaded images in production. The `AWS_*` variables
-   are already in `.env.example` for this.
-
-Run `python manage.py check --deploy` against your real production `.env`
-before going live; this project ships with it passing (one optional
-HSTS-preload warning left for you to opt into deliberately).
-
-**The React app ships inside the same container.** The Dockerfile has a Node
-build stage (`npm ci && npm run build`) and Django serves `frontend/dist` itself
-(hashed assets with immutable caching, client-side routes fall back to
-`index.html`). For heavier traffic, serve `frontend/dist` from a CDN/Nginx and
-keep Django for `/api`, `/admin` and `/media` — set `VITE_API_BASE` at build time
-if the API then lives on another origin (and add that origin to
-`CORS_ALLOWED_ORIGINS`).
+See [Render deployment instructions](docs/RENDER_DEPLOYMENT.md) for the Docker
+web service, PostgreSQL/TLS environment, CORS/CSRF, SMTP, static files, media
+disk, and safe migration workflow. The React storefront is built in the
+Dockerfile and served by Django on the same origin. Use `.env.example` for local
+development; production secrets belong in Render's environment settings.
 
 ## Environment variables
 
-See `.env.example` for the full, authoritative list with inline comments —
-including `DELIVERY_CHARGE_INSIDE_DHAKA` / `DELIVERY_CHARGE_OUTSIDE_DHAKA`
-for the flat-rate delivery charge checkout applies based on the shipping
-address's city. Nothing sensitive is hardcoded anywhere in this codebase.
-
+See `.env.example` for local-development values and `.env.production.example`
+for a secret-free production variable template. Never commit populated `.env`
+files or put backend credentials in frontend `VITE_*` variables.
 ## Roadmap
 
 | Phase | Scope | Status |

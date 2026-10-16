@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
+!frontend/.env.production.example
 
 # Python
 __pycache__/
@@ -31,3 +33,4 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/.env.local
+node_modules/
