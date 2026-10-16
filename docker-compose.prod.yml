@@ -1,0 +1,24 @@
+# Overrides for a production-like run (e.g. on a VPS). Use alongside
+# docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  web:
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn -c gunicorn.conf.py config.wsgi:application"
+  worker:
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+  beat:
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+  db:
+    restart: unless-stopped
+  redis:
+    restart: unless-stopped

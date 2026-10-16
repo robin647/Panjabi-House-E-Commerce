@@ -1,0 +1,71 @@
+{% extends "admin/index.html" %}
+{% load static store_dashboard %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'core/admin.css' %}">{% endblock %}
+
+{% block content %}
+{% store_dashboard as store %}
+<section class="store-dashboard" aria-labelledby="store-dashboard-title">
+    <h2 id="store-dashboard-title">Store overview</h2>
+    <div class="store-dashboard__grid">
+        {% if store.products != None %}
+        <a class="store-dashboard__stat store-dashboard__stat--products" href="{% url 'admin:catalog_product_changelist' %}">
+            <span class="store-dashboard__label">Products</span>
+            <strong>{{ store.products }}</strong>
+        </a>
+        {% endif %}
+        {% if store.categories != None %}
+        <a class="store-dashboard__stat store-dashboard__stat--categories" href="{% url 'admin:catalog_category_changelist' %}">
+            <span class="store-dashboard__label">Categories</span>
+            <strong>{{ store.categories }}</strong>
+        </a>
+        {% endif %}
+        {% if store.orders != None %}
+        <a class="store-dashboard__stat store-dashboard__stat--orders" href="{% url 'admin:orders_order_changelist' %}">
+            <span class="store-dashboard__label">Orders</span>
+            <strong>{{ store.orders }}</strong>
+        </a>
+        {% endif %}
+        {% if store.inventory != None %}
+        <div class="store-dashboard__stat store-dashboard__stat--inventory">
+            <span class="store-dashboard__label">Available units</span>
+            <strong>{{ store.inventory }}</strong>
+            <span class="store-dashboard__detail">{{ store.out_of_stock }} products out of stock</span>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if store.recent_orders %}
+    <section class="store-dashboard__recent" aria-labelledby="recent-orders-title">
+        <h3 id="recent-orders-title">Recent orders</h3>
+        <div class="store-dashboard__table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Order</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Payment</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Placed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in store.recent_orders %}
+                    <tr>
+                        <td><a href="{% url 'admin:orders_order_change' order.pk %}">{{ order.order_number }}</a></td>
+                        <td>{{ order.user.get_full_name }}</td>
+                        <td>{{ order.get_status_display }}</td>
+                        <td>{{ order.get_payment_status_display }}</td>
+                        <td>{{ order.total|floatformat:2 }}</td>
+                        <td>{{ order.created_at|date:"M j, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</section>
+{{ block.super }}
+{% endblock %}
